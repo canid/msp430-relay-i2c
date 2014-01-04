@@ -1,16 +1,30 @@
 //******************************************************************************
-//   MSP430G2x31 - I2C Relay Controller, Slave
+//   MSP430G2x31 - I2C Automation Controller/Sensor, Slave Node
 //
-//   Description: This is the firmware for the relay controller, functioning as
-// an I2C slave device.
+//   Description: This is the firmware for the i2c slave controller.
 //
 //******************************************************************************
 
-#include <msp430g2231.h>
+#include <msp430.h>
 
-char Bits = 0;
-char SLV_Addr = 0x90;                  // Address is 0x48<<1 for R/W
-int I2C_State = 0;                     // State variable
+// peripheral selections
+#define ADC								// Define if slave needs ADC10
+
+//   Select peripheral type for each pin:
+// RELAY for relay or other digital output such as MOSFET or other TTL control,
+// DIGITAL for digtal input such as TTL sensor, switch, etc.
+// CT for current transformer,
+// NTC for negative temp. coefficient thermistor,
+// PTC for positive temp. coefficient thermistor,
+#define P1_0 RELAY
+#define P1_1 RELAY
+#define P1_2 RELAY
+#define P1_3 RELAY
+#define P1_4 CT
+#define P1_5 NTC
+
+char ownAddr = 0x90;                  // Address is 0x48<<1 for R/W
+int i2cState = 0;                     // State variable
 unsigned char RXData=0;
 
 void main(void)
@@ -21,12 +35,93 @@ void main(void)
     while(1);                          // If calibration constants erased
                                        // do not load, trap CPU!!
   }
+
+  // Peripherals setup
+  // port setup stuff
+  #if P1_0 == RELAY
+    P1DIR |= BIT0;						// set pin to output.
+  #elif P1_0 == THERM
+    P1DIR &= ~BIT0;						// set pin to input.
+    ADC10CTL1 |= INCH0;					// enable adc chan. 0
+  #elif P1_0 == CT
+    P1DIR &= ~BIT0;						// set pin to input.
+    ADC10CTL1 |= INCH0;					// enable adc chan
+  #elif P1_0 == ACLK
+
+  #elif P1_0 == TA0CLK
+
+  #endif
+
+  #if P1_1 == RELAY
+    P1DIR |= BIT1;						// set pin to output.
+  #elif P1_1 == THERM
+    P1DIR &= ~BIT1;						// set pin to input.
+    ADC10CTL1 |= INCH1;					// enable adc chan.
+  #elif P1_1 == CT
+    P1DIR &= ~BIT1;						// set pin to input.
+    ADC10CTL1 |= INCH1;					// enable adc chan.
+  #elif P1_1 == TA0
+
+  #endif
+
+  #if P1_2 == RELAY
+  	P1DIR |= BIT2;						// set pin to output.
+  #elif P1_2 == THERM
+    P1DIR &= ~BIT2;						// set pin to input.
+    ADC10CTL1 |= INCH2;					// enable adc chan.
+  #elif P1_2 == CT
+    P1DIR &= ~BIT2;						// set pin to input.
+    ADC10CTL1 |= INCH2;					// enable adc chan.
+  #elif P1_2 == TA0
+
+  #endif
+
+  #if P1_3 == RELAY
+  	P1DIR |= BIT3;						// set pin to output.
+  #elif P1_3 == NTC
+    P1DIR &= ~BIT3;						// set pin to input.
+    ADC10CTL1 |= INCH3;					// enable adc chan.
+  #elif P1_3 == CT
+    P1DIR &= ~BIT3;						// set pin to input.
+    ADC10CTL1 |= INCH3;					// enable adc chan.
+  #elif P1_3 == ADC10CLK
+
+  #elif P1_3 == VREFn
+
+  #endif
+
+  #if P1_4 == RELAY
+  	P1DIR |= BIT4;						// set pin to output.
+  #elif P1_4 == THERM
+    P1DIR &= ~BIT4;						// set pin to input.
+    ADC10CTL1 |= INCH4;					// enable adc chan.
+  #elif P1_4 == CT
+    P1DIR &= ~BIT4;						// set pin to input.
+    ADC10CTL1 |= INCH4;					// enable adc chan.
+  #elif P1_4 == SMCLK
+
+  #elif P1_4 == VREFp
+
+  #endif
+
+  #if P1_5 == RELAY
+  	P1DIR |= BIT5;						// set pin to output.
+  #elif P1_5 == THERM
+  	P1DIR &= ~BIT5;						// set pin to input.
+  	ADC10CTL1 |= INCH5;					// enable adc chan.
+  #elif P1_5 == CT
+  	P1DIR &= ~BIT5;						// set pin to input.
+  	ADC10CTL1 |= INCH5;					// enable adc chan.
+  #elif P1_5 == SCLK
+
+  #endif
+
+
   BCSCTL1 = CALBC1_1MHZ;               // Set DCO
   DCOCTL = CALDCO_1MHZ;
 
   P1OUT = 0xC0;                        // P1.6 & P1.7 Pullups
   P1REN |= 0xC0;                       // P1.6 & P1.7 Pullups
-  P1DIR = 0xFF;                        // Unused pins as outputs
   P2OUT = 0;
   P2DIR = 0xFF;
 
@@ -37,6 +132,10 @@ void main(void)
   USICTL0 &= ~USISWRST;                // Enable USI
   USICTL1 &= ~USIIFG;                  // Clear pending flag
   _EINT();
+
+  #ifdef ADC
+    ADC10CTL0 |= ENC + ADC10SC;
+  #endif
 
   while(1)
   {
@@ -54,10 +153,10 @@ __interrupt void USI_TXRX (void)
   if (USICTL1 & USISTTIFG)             // Start entry?
   {
     P1OUT |= 0x01;                     // LED on: sequence start
-    I2C_State = 2;                     // Enter 1st state on start
+    i2cState = 2;                     // Enter 1st state on start
   }
 
-  switch(I2C_State)
+  switch(i2cState)
     {
       case 0: // Idle, should not get here
               break;
@@ -65,38 +164,38 @@ __interrupt void USI_TXRX (void)
       case 2: // RX Address
               USICNT = (USICNT & 0xE0) + 0x08; // Bit counter = 8, RX address
               USICTL1 &= ~USISTTIFG;   // Clear start flag
-              I2C_State = 4;           // Go to next state: check address
+              i2cState = 4;           // Go to next state: check address
               break;
 
       case 4: // Process Address and send (N)Ack
               if (USISRL & 0x01)       // If read...
-                SLV_Addr++;            // Save R/W bit
+                ownAddr++;            // Save R/W bit
               USICTL0 |= USIOE;        // SDA = output
-              if (USISRL == SLV_Addr)  // Address match?
+              if (USISRL == ownAddr)  // Address match?
               {
                 USISRL = 0x00;         // Send Ack
                 P1OUT &= ~0x01;        // LED off
-                I2C_State = 8;         // Go to next state: RX data
+                i2cState = 8;         // Go to next state: RX data
               }
               else
               {
                 USISRL = 0xFF;         // Send NAck
                 P1OUT |= 0x01;         // LED on: error
-                I2C_State = 6;         // Go to next state: prep for next Start
+                i2cState = 6;         // Go to next state: prep for next Start
               }
               USICNT |= 0x01;          // Bit counter = 1, send (N)Ack bit
               break;
 
       case 6: // Prep for Start condition
               USICTL0 &= ~USIOE;       // SDA = input
-              SLV_Addr = 0x90;         // Reset slave address
-              I2C_State = 0;           // Reset state machine
+              ownAddr = 0x90;         // Reset slave address
+              i2cState = 0;           // Reset state machine
               break;
 
       case 8: // Receive data byte
               USICTL0 &= ~USIOE;       // SDA = input
               USICNT |=  0x08;         // Bit counter = 8, RX data
-              I2C_State = 10;          // Go to next state: Test data and (N)Ack
+              i2cState = 10;          // Go to next state: Test data and (N)Ack
               break;
 
       case 10:// Check Data & TX (N)Ack
@@ -105,23 +204,22 @@ __interrupt void USI_TXRX (void)
               USICTL0 |= USIOE;        // SDA = output
               P1OUT = 0x0;
               if(RXData & BIT0) {
-            	  Bits |= BIT1;
+                  P1OUT |= BIT1;
               } if(RXData & BIT1) {
-            	  Bits |= BIT2;
+                  P1OUT |= BIT2;
               } if(RXData & BIT2) {
-            	  Bits |= BIT3;
+                  P1OUT |= BIT3;
               } if(RXData & BIT3) {
-            	  Bits |= BIT4;
+                  P1OUT |= BIT4;
               } USISRL = 0x00;         // Send Ack
-              Bits &= ~0x01;        // LED off
-              P1OUT = Bits;
+              P1OUT &= ~0x01;        // LED off
 /*              {
                 USISRL = 0xFF;         // Send NAck
                 P1OUT |= 0x01;         // LED on: error
               }
 */
               USICNT |= 0x01;          // Bit counter = 1, send (N)Ack bit
-              I2C_State = 6;           // Go to next state: prep for next Start
+              i2cState = 6;           // Go to next state: prep for next Start
               break;
     }
 
