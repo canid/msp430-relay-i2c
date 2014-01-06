@@ -23,29 +23,45 @@
 #define P1_4 CT
 #define P1_5 NTC
 
-char ownAddr = 0x90;                  // Address is 0x48<<1 for R/W
-int i2cState = 0;                     // State variable
+// Address is 0x48<<1 for R/W
+char ownAddr = 0x90;         
+// State variable
+int i2cState = 0;                     
 unsigned char RXData=0;
 
 void main(void)
 {
-  WDTCTL = WDTPW + WDTHOLD;            // Stop watchdog
+  // Stop watchdog
+  WDTCTL = WDTPW + WDTHOLD;            
   if (CALBC1_1MHZ ==0xFF || CALDCO_1MHZ == 0xFF)
   {
-    while(1);                          // If calibration constants erased
-                                       // do not load, trap CPU!!
+    // If calibration constants erased
+    while(1);          
+    
+    // do not load, trap CPU!!
+                                       
   }
 
   // Peripherals setup
   // port setup stuff
   #if P1_0 == RELAY
-    P1DIR |= BIT0;						// set pin to output.
+  
+    // set pin to output.
+    P1DIR |= BIT0;						
   #elif P1_0 == THERM
-    P1DIR &= ~BIT0;						// set pin to input.
-    ADC10CTL1 |= INCH0;					// enable adc chan. 0
+  
+    // set pin to input.
+    P1DIR &= ~BIT0;			
+    
+    // enable adc chan. 0
+    ADC10CTL1 |= INCH0;					
   #elif P1_0 == CT
-    P1DIR &= ~BIT0;						// set pin to input.
-    ADC10CTL1 |= INCH0;					// enable adc chan
+  
+    // set pin to input.
+    P1DIR &= ~BIT0;				
+    
+    // enable adc chan
+    ADC10CTL1 |= INCH0;					
   #elif P1_0 == ACLK
 
   #elif P1_0 == TA0CLK
@@ -53,37 +69,67 @@ void main(void)
   #endif
 
   #if P1_1 == RELAY
-    P1DIR |= BIT1;						// set pin to output.
+  
+    // set pin to output.
+    P1DIR |= BIT1;						
   #elif P1_1 == THERM
-    P1DIR &= ~BIT1;						// set pin to input.
-    ADC10CTL1 |= INCH1;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT1;			
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH1;					
   #elif P1_1 == CT
-    P1DIR &= ~BIT1;						// set pin to input.
-    ADC10CTL1 |= INCH1;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT1;			
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH1;					
   #elif P1_1 == TA0
 
   #endif
 
   #if P1_2 == RELAY
-  	P1DIR |= BIT2;						// set pin to output.
+  
+    // set pin to output.
+  	P1DIR |= BIT2;						
   #elif P1_2 == THERM
-    P1DIR &= ~BIT2;						// set pin to input.
-    ADC10CTL1 |= INCH2;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT2;				
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH2;					
   #elif P1_2 == CT
-    P1DIR &= ~BIT2;						// set pin to input.
-    ADC10CTL1 |= INCH2;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT2;					
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH2;					
   #elif P1_2 == TA0
 
   #endif
 
   #if P1_3 == RELAY
-  	P1DIR |= BIT3;						// set pin to output.
+  
+    // set pin to output.
+  	P1DIR |= BIT3;						
   #elif P1_3 == NTC
-    P1DIR &= ~BIT3;						// set pin to input.
-    ADC10CTL1 |= INCH3;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT3;				
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH3;					
   #elif P1_3 == CT
-    P1DIR &= ~BIT3;						// set pin to input.
-    ADC10CTL1 |= INCH3;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT3;				
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH3;					
   #elif P1_3 == ADC10CLK
 
   #elif P1_3 == VREFn
@@ -91,13 +137,23 @@ void main(void)
   #endif
 
   #if P1_4 == RELAY
-  	P1DIR |= BIT4;						// set pin to output.
+  
+    // set pin to output.
+  	P1DIR |= BIT4;						
   #elif P1_4 == THERM
-    P1DIR &= ~BIT4;						// set pin to input.
-    ADC10CTL1 |= INCH4;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT4;					
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH4;					
   #elif P1_4 == CT
-    P1DIR &= ~BIT4;						// set pin to input.
-    ADC10CTL1 |= INCH4;					// enable adc chan.
+  
+    // set pin to input.
+    P1DIR &= ~BIT4;						
+    
+    // enable adc chan.
+    ADC10CTL1 |= INCH4;					
   #elif P1_4 == SMCLK
 
   #elif P1_4 == VREFp
@@ -105,32 +161,57 @@ void main(void)
   #endif
 
   #if P1_5 == RELAY
-  	P1DIR |= BIT5;						// set pin to output.
+  
+    // set pin to output.
+  	P1DIR |= BIT5;						
   #elif P1_5 == THERM
-  	P1DIR &= ~BIT5;						// set pin to input.
-  	ADC10CTL1 |= INCH5;					// enable adc chan.
+  
+    // set pin to input.
+  	P1DIR &= ~BIT5;				
+  	
+  	// enable adc chan.
+  	ADC10CTL1 |= INCH5;					
   #elif P1_5 == CT
-  	P1DIR &= ~BIT5;						// set pin to input.
-  	ADC10CTL1 |= INCH5;					// enable adc chan.
+  
+    // set pin to input.
+  	P1DIR &= ~BIT5;				
+  	
+  	// enable adc chan.
+  	ADC10CTL1 |= INCH5;					
   #elif P1_5 == SCLK
 
   #endif
 
 
-  BCSCTL1 = CALBC1_1MHZ;               // Set DCO
+  // Set DCO
+  BCSCTL1 = CALBC1_1MHZ;               
   DCOCTL = CALDCO_1MHZ;
 
-  P1OUT = 0xC0;                        // P1.6 & P1.7 Pullups
-  P1REN |= 0xC0;                       // P1.6 & P1.7 Pullups
+  // P1.6 & P1.7 Pullups
+  P1OUT = 0xC0;       
+  
+  // P1.6 & P1.7 Pullups
+  P1REN |= 0xC0;                       
   P2OUT = 0;
   P2DIR = 0xFF;
 
-  USICTL0 = USIPE6+USIPE7+USISWRST;    // Port & USI mode setup
-  USICTL1 = USII2C+USIIE+USISTTIE;     // Enable I2C mode & USI interrupts
-  USICKCTL = USICKPL;                  // Setup clock polarity
-  USICNT |= USIIFGCC;                  // Disable automatic clear control
-  USICTL0 &= ~USISWRST;                // Enable USI
-  USICTL1 &= ~USIIFG;                  // Clear pending flag
+  // Port & USI mode setup
+  USICTL0 = USIPE6+USIPE7+USISWRST;    
+  
+  // Enable I2C mode & USI interrupts
+  USICTL1 = USII2C+USIIE+USISTTIE;     
+  
+  // Setup clock polarity
+  USICKCTL = USICKPL;         
+  
+  // Disable automatic clear control
+  USICNT |= USIIFGCC;      
+  
+  // Enable USI
+  USICTL0 &= ~USISWRST;          
+  
+  // Clear pending flag
+  USICTL1 &= ~USIIFG;                  
   _EINT();
 
   #ifdef ADC
@@ -139,8 +220,11 @@ void main(void)
 
   while(1)
   {
-    LPM0;                              // CPU off, await USI interrupt
-    _NOP();                            // Used for IAR
+    // CPU off, await USI interrupt
+    LPM0;                          
+    
+    // Used for IAR
+    _NOP();                            
   }
 }
 
@@ -150,58 +234,114 @@ void main(void)
 #pragma vector = USI_VECTOR
 __interrupt void USI_TXRX (void)
 {
-  if (USICTL1 & USISTTIFG)             // Start entry?
+  
+  // Start entry?
+  if (USICTL1 & USISTTIFG)             
   {
-    P1OUT |= 0x01;                     // LED on: sequence start
-    i2cState = 2;                     // Enter 1st state on start
+    
+    // LED on: sequence start
+    P1OUT |= 0x01;           
+    
+    // Enter 1st state on start
+    i2cState = 2;                     
   }
 
   switch(i2cState)
     {
-      case 0: // Idle, should not get here
+      
+      // Idle, should not get here
+      case 0: 
               break;
 
-      case 2: // RX Address
-              USICNT = (USICNT & 0xE0) + 0x08; // Bit counter = 8, RX address
-              USICTL1 &= ~USISTTIFG;   // Clear start flag
-              i2cState = 4;           // Go to next state: check address
+      // RX Address
+      case 2: 
+      
+              // Bit counter = 8, RX address
+              USICNT = (USICNT & 0xE0) + 0x08; 
+              
+              // Clear start flag
+              USICTL1 &= ~USISTTIFG;   
+              
+              // Go to next state: check address
+              i2cState = 4;           
               break;
 
-      case 4: // Process Address and send (N)Ack
-              if (USISRL & 0x01)       // If read...
-                ownAddr++;            // Save R/W bit
-              USICTL0 |= USIOE;        // SDA = output
-              if (USISRL == ownAddr)  // Address match?
+      // Process Address and send (N)Ack
+      case 4: 
+      
+              // If read...
+              if (USISRL & 0x01)    
+              
+                // Save R/W bit
+                ownAddr++;       
+                
+              // SDA = output
+              USICTL0 |= USIOE;      
+              
+              // Address match?
+              if (USISRL == ownAddr)  
               {
-                USISRL = 0x00;         // Send Ack
-                P1OUT &= ~0x01;        // LED off
-                i2cState = 8;         // Go to next state: RX data
+                
+                // Send Ack
+                USISRL = 0x00;    
+                
+                // LED off
+                P1OUT &= ~0x01;      
+                
+                // Go to next state: RX data
+                i2cState = 8;         
               }
               else
               {
-                USISRL = 0xFF;         // Send NAck
-                P1OUT |= 0x01;         // LED on: error
-                i2cState = 6;         // Go to next state: prep for next Start
+                
+                // Send NAck
+                USISRL = 0xFF;    
+                
+                // LED on: error
+                P1OUT |= 0x01;     
+                
+                // Go to next state: prep for next Start
+                i2cState = 6;         
               }
-              USICNT |= 0x01;          // Bit counter = 1, send (N)Ack bit
+              
+              // Bit counter = 1, send (N)Ack bit
+              USICNT |= 0x01;          
               break;
 
-      case 6: // Prep for Start condition
-              USICTL0 &= ~USIOE;       // SDA = input
-              ownAddr = 0x90;         // Reset slave address
-              i2cState = 0;           // Reset state machine
+      // Prep for Start condition
+      case 6: 
+      
+              // SDA = input
+              USICTL0 &= ~USIOE;     
+              
+              // Reset slave address
+              ownAddr = 0x90;   
+              
+              // Reset state machine
+              i2cState = 0;           
               break;
 
-      case 8: // Receive data byte
-              USICTL0 &= ~USIOE;       // SDA = input
-              USICNT |=  0x08;         // Bit counter = 8, RX data
-              i2cState = 10;          // Go to next state: Test data and (N)Ack
+      // Receive data byte
+      case 8: 
+      
+              // SDA = input
+              USICTL0 &= ~USIOE;     
+              
+              // Bit counter = 8, RX data
+              USICNT |=  0x08;       
+              
+              // Go to next state: Test data and (N)Ack
+              i2cState = 10;          
               break;
 
-      case 10:// Check Data & TX (N)Ack
-              RXData = USISRL;                 // Get RX data
+      // Check Data & TX (N)Ack
+      case 10:
+      
+              // Get RX data
+              RXData = USISRL;                 
 
-              USICTL0 |= USIOE;        // SDA = output
+              // SDA = output
+              USICTL0 |= USIOE;        
               P1OUT = 0x0;
               if(RXData & BIT0) {
                   P1OUT |= BIT1;
@@ -211,15 +351,27 @@ __interrupt void USI_TXRX (void)
                   P1OUT |= BIT3;
               } if(RXData & BIT3) {
                   P1OUT |= BIT4;
-              } USISRL = 0x00;         // Send Ack
-              P1OUT &= ~0x01;        // LED off
+              } 
+              
+              // Send Ack
+              USISRL = 0x00;     
+              
+              // LED off
+              P1OUT &= ~0x01;        
 /*              {
-                USISRL = 0xFF;         // Send NAck
-                P1OUT |= 0x01;         // LED on: error
+                // Send NAck
+                USISRL = 0xFF;    
+                
+                // LED on: error
+                P1OUT |= 0x01;         
               }
 */
-              USICNT |= 0x01;          // Bit counter = 1, send (N)Ack bit
-              i2cState = 6;           // Go to next state: prep for next Start
+              
+              // Bit counter = 1, send (N)Ack bit
+              USICNT |= 0x01;     
+              
+              // Go to next state: prep for next Start
+              i2cState = 6;           
               break;
     }
 
