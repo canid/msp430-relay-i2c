@@ -8,9 +8,10 @@
 #include <msp430.h>
 
 // peripheral selections
-#define ADC								// Define if slave needs ADC10
+// Define if slave needs ADC10
+#define ADC								
 
-//   Select peripheral type for each pin:
+// Select peripheral type for each pin:
 // RELAY for relay or other digital output such as MOSFET or other TTL control,
 // DIGITAL for digtal input such as TTL sensor, switch, etc.
 // CT for current transformer,
@@ -25,8 +26,10 @@
 
 // Address is 0x48<<1 for R/W
 char ownAddr = 0x90;         
+
 // State variable
-int i2cState = 0;                     
+int i2cState = 0;           
+
 unsigned char RXData=0;
 
 void main(void)
@@ -35,6 +38,7 @@ void main(void)
   WDTCTL = WDTPW + WDTHOLD;            
   if (CALBC1_1MHZ ==0xFF || CALDCO_1MHZ == 0xFF)
   {
+    
     // If calibration constants erased
     while(1);          
     
